@@ -10,8 +10,24 @@ public class Server {
     private LdapServerResource server;
 
     public static void main(String[] args) throws Exception {
-        gateway = new GatewayServer(new Server());
-        gateway.start();
+        boolean started = false;
+        int inc = 0;
+
+        do {
+            try {
+                gateway = new GatewayServer(new Server(), 25333+inc);
+                gateway.start();
+                started = true;
+            } catch (py4j.Py4JNetworkException e) {
+                if (inc > 9) {
+                    System.err.println("Unable to find a free port to start gateway");
+                    System.exit(1);
+                }
+
+                inc++;
+            }
+        } while (!started);
+
         System.out.println("Gateway server started on port "+gateway.getPort()+"!");
     }
 
